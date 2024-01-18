@@ -21,9 +21,11 @@ defmodule TashkentAqNotifierWeb.Router do
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", TashkentAqNotifierWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", TashkentAqNotifierWeb do
+    pipe_through :api
+
+    post "/", PageController, :handle_update
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:tashkent_aq_notifier, :dev_routes) do
