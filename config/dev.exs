@@ -3,7 +3,7 @@ import Config
 # Configure your database
 config :tashkent_aq_notifier, TashkentAqNotifier.Repo,
   username: "postgres",
-  password: "postgres",
+  password: "tashkent",
   hostname: "localhost",
   database: "tashkent_aq_notifier_dev",
   stacktrace: true,
