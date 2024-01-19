@@ -4,6 +4,7 @@ defmodule TashkentAqNotifier.Subscribers do
   """
 
   import Ecto.Query, warn: false
+  alias Ecto.Multi
   alias TashkentAqNotifier.Repo
 
   alias TashkentAqNotifier.Subscribers.Subscriber
@@ -71,6 +72,30 @@ defmodule TashkentAqNotifier.Subscribers do
     subscriber
     |> Subscriber.changeset(attrs)
     |> Repo.update()
+  end
+
+  def update_subscriber_status_to_unsubscribed(chat_id) do
+    chat_id_string = chat_id |> Integer.to_string()
+    query = from s in Subscriber, where: s.chat_id == ^chat_id_string
+
+    Multi.new()
+    |> Multi.one(:subcriber, query)
+    |> Multi.update(:set_is_subscribed_to_false, fn %{subcriber: subscriber} ->
+      Ecto.Changeset.change(subscriber, is_subscribed: false)
+    end)
+    |> Repo.transaction()
+  end
+
+  def update_subscriber_status_to_subcribed(chat_id) do
+    chat_id_string = chat_id |> Integer.to_string()
+    query = from s in Subscriber, where: s.chat_id == ^chat_id_string
+
+    Multi.new()
+    |> Multi.one(:subcriber, query)
+    |> Multi.update(:set_is_subscribed_to_false, fn %{subcriber: subscriber} ->
+      Ecto.Changeset.change(subscriber, is_subscribed: true)
+    end)
+    |> Repo.transaction()
   end
 
   @doc """
