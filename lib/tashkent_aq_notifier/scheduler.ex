@@ -6,14 +6,37 @@ defmodule TashkentAqNotifier.Scheduler do
   end
 
   def init(state) do
-    schedule()
+    initiate_scheduler()
     {:ok, state}
   end
 
   def handle_info(:broadcast, state) do
-    ids = [242_087_850, 6_169_337_963]
+    now = get_time_in_tashkent_now()
 
-    now = DateTime.utc_now() |> DateTime.add(5, :hour)
+    if now.hour > 7 do
+      broadcast()
+    end
+
+    schedule()
+    {:noreply, state}
+  end
+
+  def schedule() do
+    Process.send_after(self(), :broadcast, 5_000)
+  end
+
+  def initiate_scheduler() do
+    now = get_time_in_tashkent_now()
+    minutes = now.minute - 1
+    later = now |> DateTime.add(1, :hour) |> DateTime.add(-minutes, :minute)
+
+    ms_before_next_hour_01_minute = DateTime.diff(later, now, :millisecond)
+    Process.send_after(self(), :broadcast, ms_before_next_hour_01_minute)
+  end
+
+  defp broadcast() do
+    now = get_time_in_tashkent_now()
+    ids = [242_087_850, 6_169_337_963]
 
     Enum.each(ids, fn id ->
       case Telegex.send_message(
@@ -28,13 +51,9 @@ defmodule TashkentAqNotifier.Scheduler do
           nil
       end
     end)
-
-    schedule()
-
-    {:noreply, state}
   end
 
-  def schedule() do
-    Process.send_after(self(), :broadcast, 5_000)
+  defp get_time_in_tashkent_now() do
+    DateTime.utc_now() |> DateTime.add(5, :hour)
   end
 end
