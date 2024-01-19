@@ -1,0 +1,51 @@
+<.header>
+  Listing Subscribers
+  <:actions>
+    <.link patch={~p"/subscribers/new"}>
+      <.button>New Subscriber</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="subscribers"
+  rows={@streams.subscribers}
+  row_click={fn {_id, subscriber} -> JS.navigate(~p"/subscribers/#{subscriber}") end}
+>
+  <:col :let={{_id, subscriber}} label="First name"><%= subscriber.first_name %></:col>
+  <:col :let={{_id, subscriber}} label="Is bot"><%= subscriber.is_bot %></:col>
+  <:col :let={{_id, subscriber}} label="Is subscribed"><%= subscriber.is_subscribed %></:col>
+  <:col :let={{_id, subscriber}} label="Language code"><%= subscriber.language_code %></:col>
+  <:col :let={{_id, subscriber}} label="Username"><%= subscriber.username %></:col>
+  <:col :let={{_id, subscriber}} label="Chat"><%= subscriber.chat_id %></:col>
+  <:action :let={{_id, subscriber}}>
+    <div class="sr-only">
+      <.link navigate={~p"/subscribers/#{subscriber}"}>Show</.link>
+    </div>
+    <.link patch={~p"/subscribers/#{subscriber}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, subscriber}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: subscriber.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="subscriber-modal"
+  show
+  on_cancel={JS.patch(~p"/subscribers")}
+>
+  <.live_component
+    module={TashkentAqNotifierWeb.SubscriberLive.FormComponent}
+    id={@subscriber.id || :new}
+    title={@page_title}
+    action={@live_action}
+    subscriber={@subscriber}
+    patch={~p"/subscribers"}
+  />
+</.modal>

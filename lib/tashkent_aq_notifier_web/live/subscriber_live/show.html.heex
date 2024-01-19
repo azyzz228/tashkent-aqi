@@ -1,0 +1,36 @@
+<.header>
+  Subscriber <%= @subscriber.id %>
+  <:subtitle>This is a subscriber record from your database.</:subtitle>
+  <:actions>
+    <.link patch={~p"/subscribers/#{@subscriber}/show/edit"} phx-click={JS.push_focus()}>
+      <.button>Edit subscriber</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="First name"><%= @subscriber.first_name %></:item>
+  <:item title="Is bot"><%= @subscriber.is_bot %></:item>
+  <:item title="Is subscribed"><%= @subscriber.is_subscribed %></:item>
+  <:item title="Language code"><%= @subscriber.language_code %></:item>
+  <:item title="Username"><%= @subscriber.username %></:item>
+  <:item title="Chat"><%= @subscriber.chat_id %></:item>
+</.list>
+
+<.back navigate={~p"/subscribers"}>Back to subscribers</.back>
+
+<.modal
+  :if={@live_action == :edit}
+  id="subscriber-modal"
+  show
+  on_cancel={JS.patch(~p"/subscribers/#{@subscriber}")}
+>
+  <.live_component
+    module={TashkentAqNotifierWeb.SubscriberLive.FormComponent}
+    id={@subscriber.id}
+    title={@page_title}
+    action={@live_action}
+    subscriber={@subscriber}
+    patch={~p"/subscribers/#{@subscriber}"}
+  />
+</.modal>
