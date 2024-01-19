@@ -13,6 +13,7 @@
   row_click={fn {_id, subscriber} -> JS.navigate(~p"/subscribers/#{subscriber}") end}
 >
   <:col :let={{_id, subscriber}} label="First name"><%= subscriber.first_name %></:col>
+  <:col :let={{_id, subscriber}} label="last name"><%= subscriber.last_name %></:col>
   <:col :let={{_id, subscriber}} label="Is bot"><%= subscriber.is_bot %></:col>
   <:col :let={{_id, subscriber}} label="Is subscribed"><%= subscriber.is_subscribed %></:col>
   <:col :let={{_id, subscriber}} label="Language code"><%= subscriber.language_code %></:col>
