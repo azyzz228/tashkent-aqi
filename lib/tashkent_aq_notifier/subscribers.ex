@@ -22,6 +22,11 @@ defmodule TashkentAqNotifier.Subscribers do
     Repo.all(Subscriber)
   end
 
+  def list_active_subscribers do
+    query = from s in Subscriber, where: s.is_subscribed == true
+    Repo.all(query)
+  end
+
   @doc """
   Gets a single subscriber.
 
