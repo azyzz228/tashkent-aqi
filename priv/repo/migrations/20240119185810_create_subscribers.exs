@@ -7,7 +7,7 @@ defmodule TashkentAqNotifier.Repo.Migrations.CreateSubscribers do
       add :is_bot, :boolean, default: false, null: false
       add :language_code, :string
       add :username, :string
-      add :chat_id, :integer
+      add :chat_id, :string
 
       timestamps()
     end
