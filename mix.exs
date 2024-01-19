@@ -52,7 +52,8 @@ defmodule TashkentAqNotifier.MixProject do
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
       {:telegex, "~> 1.4.1"},
-      {:multipart, "~> 0.4.0"}
+      {:multipart, "~> 0.4.0"},
+      {:req, "~> 0.4.0"}
     ]
   end
 
