@@ -13,7 +13,10 @@ defmodule TashkentAqNotifier.Notifier do
 
     sources = describe_sources(us_embassy_result, tstu_result)
 
-    message <> sources
+    final_message = message <> sources
+    spawn(fn -> Cachex.put(:cache, "last_message", final_message, ttl: :timer.hours(8)) end)
+
+    final_message
   end
 
   def fetch_from_api_for(location_id) do
