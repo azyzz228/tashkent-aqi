@@ -27,14 +27,14 @@ defmodule TashkentAqNotifier.Scheduler do
   end
 
   def schedule() do
-    Process.send_after(self(), :broadcast, 5_000)
+    Process.send_after(self(), :broadcast, @three_hours_in_ms)
   end
 
   def initiate_scheduler() do
     now = uz_time_now()
     # minutes = now.minute - 7
     # later = now |> DateTime.add(1, :hour) |> DateTime.add(-minutes, :minute)
-    later = now |> DateTime.add(1, :minute)
+    later = now |> DateTime.add(2, :minute)
 
     ms_before_next_hour_01_minute = DateTime.diff(later, now, :millisecond)
     Process.send_after(self(), :broadcast, ms_before_next_hour_01_minute)
