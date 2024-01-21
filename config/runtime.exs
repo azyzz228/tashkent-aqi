@@ -98,6 +98,15 @@ if config_env() == :prod do
   #
   # Check `Plug.SSL` for all available options in `force_ssl`.
 
+
+  telegram_bot_token =
+    System.get_env("BOT_TOKEN") ||
+      raise """
+      environment variable BOT_TOKEN is missing.
+      """
+
+config :telegex, token: telegram_bot_token
+
   # ## Configuring the mailer
   #
   # In production you need to configure the mailer to use a different adapter.
