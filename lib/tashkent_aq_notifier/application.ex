@@ -18,7 +18,8 @@ defmodule TashkentAqNotifier.Application do
       {Finch, name: TashkentAqNotifier.Finch},
       # Start the Endpoint (http/https)
       TashkentAqNotifierWeb.Endpoint,
-      TashkentAqNotifier.Scheduler
+      TashkentAqNotifier.Scheduler,
+      {Cachex, name: :cache}
       # Start a worker by calling: TashkentAqNotifier.Worker.start_link(arg)
       # {TashkentAqNotifier.Worker, arg}
     ]
