@@ -7,7 +7,6 @@ defmodule TashkentAqNotifierWeb.SubscriberLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    dbg("hello")
     {:ok, stream(socket, :subscribers, Subscribers.list_subscribers())}
   end
 
