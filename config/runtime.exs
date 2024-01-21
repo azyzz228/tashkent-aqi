@@ -35,7 +35,7 @@ if config_env() == :prod do
     ssl_opts: [verify: :verify_none],
     url: database_url,
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
-    socket_options: maybe_ipv6
+    socket_options: maybe_ipv6,
     queue_target: 5000,
     queue_interval: 5000
 
@@ -98,14 +98,13 @@ if config_env() == :prod do
   #
   # Check `Plug.SSL` for all available options in `force_ssl`.
 
-
   telegram_bot_token =
     System.get_env("BOT_TOKEN") ||
       raise """
       environment variable BOT_TOKEN is missing.
       """
 
-config :telegex, token: telegram_bot_token
+  config :telegex, token: telegram_bot_token
 
   # ## Configuring the mailer
   #
