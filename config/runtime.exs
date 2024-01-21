@@ -64,6 +64,12 @@ if config_env() == :prod do
       ip: {0, 0, 0, 0, 0, 0, 0, 0},
       port: port
     ],
+    https: [
+      port: 443,
+      cipher_suite: :strong,
+      keyfile: System.get_env("SSL_KEY"),
+      certfile: System.get_env("SSL_CERT")
+    ],
     secret_key_base: secret_key_base
 
   # ## SSL Support
@@ -79,7 +85,7 @@ if config_env() == :prod do
   #         keyfile: System.get_env("SOME_APP_SSL_KEY_PATH"),
   #         certfile: System.get_env("SOME_APP_SSL_CERT_PATH")
   #       ]
-  #
+  # #
   # The `cipher_suite` is set to `:strong` to support only the
   # latest and more secure SSL ciphers. This means old browsers
   # and clients may not be supported. You can set it to
