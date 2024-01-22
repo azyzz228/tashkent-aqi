@@ -57,15 +57,14 @@ if config_env() == :prod do
   config :tashkent_aq_notifier, TashkentAqNotifierWeb.Endpoint,
     force_ssl: [rewrite_on: [:x_forwarded_proto]],
     url: [host: host],
-    # http: [
-    #   # Enable IPv6 and bind on all interfaces.
-    #   # Set it to  {0, 0, 0, 0, 0, 0, 0, 1} for local network only access.
-    #   # See the documentation on https://hexdocs.pm/plug_cowboy/Plug.Cowboy.html
-    #   # for details about using IPv6 vs IPv4 and loopback vs public addresses.
-    #   ip: {0, 0, 0, 0, 0, 0, 0, 0},
-    #   port: port
-    # ],
-    http: [port: {:system, "PORT"}],
+    http: [
+      # Enable IPv6 and bind on all interfaces.
+      # Set it to  {0, 0, 0, 0, 0, 0, 0, 1} for local network only access.
+      # See the documentation on https://hexdocs.pm/plug_cowboy/Plug.Cowboy.html
+      # for details about using IPv6 vs IPv4 and loopback vs public addresses.
+      ip: {0, 0, 0, 0, 0, 0, 0, 0},
+      port: port
+    ],
     https: [
       port: 443,
       cipher_suite: :strong,
