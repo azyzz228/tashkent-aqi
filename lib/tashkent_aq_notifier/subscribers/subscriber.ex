@@ -18,7 +18,7 @@ defmodule TashkentAqNotifier.Subscribers.Subscriber do
   def changeset(subscriber, attrs) do
     subscriber
     |> cast(attrs, [:first_name, :last_name, :is_bot, :language_code, :username, :chat_id])
-    |> validate_required([:first_name, :is_bot, :language_code, :username, :chat_id])
+    |> validate_required([:chat_id])
     |> unsafe_validate_unique(:chat_id, TashkentAqNotifier.Repo)
   end
 end
