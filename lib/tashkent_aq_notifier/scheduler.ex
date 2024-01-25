@@ -1,6 +1,5 @@
 defmodule TashkentAqNotifier.Scheduler do
   alias TashkentAqNotifier.Notification
-  alias TashkentAqNotifier.Notifier
   alias TashkentAqNotifier.Subscribers
   alias TashkentAqNotifier.Subscribers.Subscriber
   use GenServer
@@ -42,8 +41,14 @@ defmodule TashkentAqNotifier.Scheduler do
   end
 
   def broadcast() do
-    notification_message = Notifier.get_notification_message()
-    active_subscribers = Subscribers.list_active_subscribers()
+    notification_message_query =
+      Task.async(TashkentAqNotifier.Notifier, :get_notification_message, [])
+
+    active_subscribers_query =
+      Task.async(TashkentAqNotifier.Subscribers, :list_active_subscribers, [])
+
+    notification_message = Task.await(notification_message_query)
+    active_subscribers = Task.await(active_subscribers_query)
 
     successfully_sent_count =
       active_subscribers
@@ -62,7 +67,12 @@ defmodule TashkentAqNotifier.Scheduler do
 
             nil
 
-          {:error, _} ->
+          {:error,
+           %Telegex.Error{description: "Forbidden: bot was blocked by the user", error_code: 403}} ->
+            spawn(fn ->
+              Subscribers.update_subscriber_status_to_unsubscribed(subscriber.chat_id)
+            end)
+
             nil
         end
       end)
