@@ -78,6 +78,42 @@ defmodule TashkentAqNotifier.Scheduler do
     end)
   end
 
+  def broadcast(message) when is_binary(message) do
+    active_subscribers = Subscribers.list_active_subscribers()
+
+    successfully_sent_count =
+      active_subscribers
+      |> Enum.map(fn %Subscriber{} = subscriber ->
+        case Telegex.send_message(
+               subscriber.chat_id,
+               message
+             ) do
+          {:ok, _} ->
+            true
+
+          {:error, %Telegex.Error{description: "Bad Request: chat not found", error_code: 400}} ->
+            spawn(fn ->
+              Subscribers.update_subscriber_status_to_unsubscribed(subscriber.chat_id)
+            end)
+
+            nil
+
+          {:error, _} ->
+            nil
+        end
+      end)
+      |> Enum.filter(fn item -> item == true end)
+      |> Enum.count()
+
+    spawn(fn ->
+      Notification.create_message(%{
+        text: message,
+        recepient_count: active_subscribers |> Enum.count(),
+        received_count: successfully_sent_count
+      })
+    end)
+  end
+
   defp uz_time_now() do
     DateTime.utc_now() |> DateTime.add(5, :hour)
   end
