@@ -9,11 +9,7 @@ defmodule TashkentAqNotifierWeb.PageController do
   end
 
   def handle_update(conn, %{"message" => %{"text" => "/start"}} = params) do
-    IO.puts("/start")
-    dbg(params)
-
     %{"message" => %{"chat" => %{"id" => id}, "from" => new_subscriber}} = params
-
     spawn(fn -> handle_new_subscriber(new_subscriber, id) end)
 
     {:ok, _msg} =
@@ -26,15 +22,13 @@ Welcome! This bot will send updates on air quality in Tashkent every 3 hours fro
         "
       )
 
-    case Cachex.get!(:cache, "last_message") do
+    case Cachex.get!(:cache, :latest_measurement) do
       nil -> nil
       msg -> Telegex.send_message(id, msg)
     end
 
     conn
-    |> put_status(200)
-    |> put_resp_content_type("application/json")
-    |> json(%{})
+    |> return_conn()
   end
 
   def handle_update(
@@ -49,14 +43,15 @@ Welcome! This bot will send updates on air quality in Tashkent every 3 hours fro
     end)
 
     conn
-    |> put_status(200)
-    |> put_resp_content_type("application/json")
-    |> json(%{})
+    |> return_conn()
   end
 
-  def handle_update(conn, params) do
-    dbg(params)
+  def handle_update(conn, _params) do
+    conn
+    |> return_conn()
+  end
 
+  defp return_conn(conn) do
     conn
     |> put_status(200)
     |> put_resp_content_type("application/json")
