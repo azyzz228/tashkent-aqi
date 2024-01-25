@@ -1,0 +1,61 @@
+<.header>
+  Listing Messages
+  <:actions>
+    <.link patch={~p"/messages/new"}>
+      <.button>New Message</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="messages"
+  rows={@streams.messages}
+  row_click={fn {_id, message} -> JS.navigate(~p"/messages/#{message}") end}
+>
+  <:col :let={{_id, message}} label="Text">
+    <p style="
+    overflow: hidden;
+   text-overflow: ellipsis;
+   display: -webkit-box;
+   -webkit-line-clamp: 2;
+           line-clamp: 2; 
+   -webkit-box-orient: vertical;">
+      <%= message.text %>
+    </p>
+  </:col>
+  <:col :let={{_id, message}} label="Recepient count"><%= message.recepient_count %></:col>
+  <:col :let={{_id, message}} label="Received count"><%= message.received_count %></:col>
+  <:col :let={{_id, message}} label="Inserted at">
+    <%= message.inserted_at |> NaiveDateTime.add(5, :hour) %>
+  </:col>
+  <:action :let={{_id, message}}>
+    <div class="sr-only">
+      <.link navigate={~p"/messages/#{message}"}>Show</.link>
+    </div>
+    <.link patch={~p"/messages/#{message}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, message}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: message.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="message-modal"
+  show
+  on_cancel={JS.patch(~p"/messages")}
+>
+  <.live_component
+    module={TashkentAqNotifierWeb.MessageLive.FormComponent}
+    id={@message.id || :new}
+    title={@page_title}
+    action={@live_action}
+    message={@message}
+    patch={~p"/messages"}
+  />
+</.modal>
