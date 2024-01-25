@@ -12,19 +12,26 @@ defmodule TashkentAqNotifierWeb.PageController do
     %{"message" => %{"chat" => %{"id" => id}, "from" => new_subscriber}} = params
     spawn(fn -> handle_new_subscriber(new_subscriber, id) end)
 
-    {:ok, _msg} =
-      Telegex.send_message(
-        id,
-        "
+    case Telegex.send_message(
+           id,
+           "
         Xush kelibsiz! Ushbu bot 07:00-dan 23:00-gacha Toshkent havosi sifati va zararligi haqida har 3 soat xabarlaydi. Bot hech qanday davlat idorasi bilan aloqador emas. Ma'lumotlar ochiq manbalardan olinadi. O'lcho'v timizlar AQSH Elchixonasi va TDTU joylashgan.\n
 Добро пожаловать! Данный бот будет информировать вас о уровне загрязнения воздуха в Ташкенте каждый 3 часа с 07:00 до 23:00. Бот не аффилирован ни с каким государственным органом. Данные с сенсоров (расположенные в посольстве США, ТГТУ) берутся с открытых источников.\n
 Welcome! This bot will send updates on air quality in Tashkent every 3 hours from 07:00 to 23:00. Not affiliated with any government body. Based on open source data coming from US Embassy and TSTU.\n
         "
-      )
+         ) do
+      {:error,
+       %Telegex.Error{description: "Forbidden: bot was blocked by the user", error_code: 403}} ->
+        Subscribers.update_subscriber_status_to_unsubscribed(id)
 
-    case Cachex.get!(:cache, :latest_measurement) do
-      nil -> nil
-      msg -> Telegex.send_message(id, msg)
+      {:ok, _} ->
+        case Cachex.get!(:cache, :latest_measurement) do
+          nil -> nil
+          msg -> Telegex.send_message(id, msg)
+        end
+
+      _ ->
+        nil
     end
 
     conn
