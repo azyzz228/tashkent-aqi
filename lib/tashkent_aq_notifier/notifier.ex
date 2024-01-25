@@ -14,7 +14,7 @@ defmodule TashkentAqNotifier.Notifier do
     sources = describe_sources(us_embassy_result, tstu_result)
 
     final_message = message <> sources
-    spawn(fn -> Cachex.put(:cache, "last_message", final_message, ttl: :timer.hours(8)) end)
+    spawn(fn -> Cachex.put(:cache, :latest_measurement, final_message, ttl: :timer.hours(8)) end)
 
     final_message
   end
