@@ -1,4 +1,5 @@
 defmodule TashkentAqNotifier.Scheduler do
+  alias TashkentAqNotifier.Notification
   alias TashkentAqNotifier.Notifier
   alias TashkentAqNotifier.Subscribers
   alias TashkentAqNotifier.Subscribers.Subscriber
@@ -41,21 +42,39 @@ defmodule TashkentAqNotifier.Scheduler do
   end
 
   def broadcast() do
-    Subscribers.list_active_subscribers()
-    |> Enum.each(fn %Subscriber{} = subscriber ->
-      case Telegex.send_message(
-             subscriber.chat_id,
-             Notifier.get_notification_message()
-           ) do
-        {:ok, _} ->
-          nil
+    notification_message = Notifier.get_notification_message()
+    active_subscribers = Subscribers.list_active_subscribers()
 
-        {:error, %Telegex.Error{description: "Bad Request: chat not found", error_code: 400}} ->
-          spawn(fn -> Subscribers.update_subscriber_status_to_unsubscribed(subscriber.chat_id) end)
+    successfully_sent_count =
+      active_subscribers
+      |> Enum.map(fn %Subscriber{} = subscriber ->
+        case Telegex.send_message(
+               subscriber.chat_id,
+               notification_message
+             ) do
+          {:ok, _} ->
+            true
 
-        {:error, _} ->
-          nil
-      end
+          {:error, %Telegex.Error{description: "Bad Request: chat not found", error_code: 400}} ->
+            spawn(fn ->
+              Subscribers.update_subscriber_status_to_unsubscribed(subscriber.chat_id)
+            end)
+
+            nil
+
+          {:error, _} ->
+            nil
+        end
+      end)
+      |> Enum.filter(fn item -> item == true end)
+      |> Enum.count()
+
+    spawn(fn ->
+      Notification.create_message(%{
+        text: notification_message,
+        recepient_count: active_subscribers |> Enum.count(),
+        received_count: successfully_sent_count
+      })
     end)
   end
 
