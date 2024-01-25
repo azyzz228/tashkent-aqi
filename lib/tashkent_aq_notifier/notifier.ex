@@ -37,42 +37,51 @@ defmodule TashkentAqNotifier.Notifier do
     }
   end
 
-  defp produce_message(average_pm25_levels) when average_pm25_levels <= 12 do
-    "🟢 Xush xabar! Toshkent havosi sog'lom. PM2.5 darajasi #{average_pm25_levels} µg/m³. Toza havodan rohatlaning! 🌳\n
-    🟢 Хорошие новости! Качество воздуха сейчас хорошее. Концентрация PM2.5 частиц составляет #{average_pm25_levels} µg/m³. Наслаждайтесь свежим воздухом! 🌳 \n
-    🟢 Good news! The air quality is healthy right now with a PM2.5 concentration of #{average_pm25_levels} µg/m³. Enjoy the fresh air! 🌳\n
+  def produce_message(average_pm25_levels) when average_pm25_levels <= 12 do
+    "⏰ #{get_formated_time_now()} \n
+🟢 Xush xabar! Toshkent havosi sog'lom. PM2.5 darajasi #{average_pm25_levels} µg/m³. Toza havodan rohatlaning! 🌳\n
+🟢 Хорошие новости! Качество воздуха сейчас хорошее. Концентрация PM2.5 частиц составляет #{average_pm25_levels} µg/m³. Наслаждайтесь свежим воздухом! 🌳 \n
+🟢 Good news! The air quality is healthy right now with a PM2.5 concentration of #{average_pm25_levels} µg/m³. Enjoy the fresh air! 🌳\n
    "
   end
 
-  defp produce_message(average_pm25_levels)
-       when average_pm25_levels > 12 and average_pm25_levels <= 35.4 do
-    "🟡 Havo sifati o'rtacha. Sog'lig'i yomon kimsalar ochiq havoda uzoq vaqt bo'lishi tavsiya etilmaydi. PM2.5 darajasi #{average_pm25_levels} µg/m³.\n
-    🟡 Качество воздуха сейчас умеренное. Людям с плохим состоянием здоровья следует ограничить долгое времяпровождение на улице. Концентрация PM2.5 частиц составляет #{average_pm25_levels} µg/m³.\n
-    🟡 The air quality is moderate at the moment. Sensitive groups may consider limiting prolonged outdoor activities. PM2.5 concentration is #{average_pm25_levels} µg/m³.\n
+  def produce_message(average_pm25_levels)
+      when average_pm25_levels > 12 and average_pm25_levels <= 35.4 do
+    amount_exceeds_by = (average_pm25_levels / 5) |> Float.floor(1)
+    "⏰ #{get_formated_time_now()} \n
+🟡 Havo sifati o'rtacha. Sog'lig'i yomon kimsalar ochiq havoda uzoq vaqt bo'lishi tavsiya etilmaydi. PM2.5 darajasi #{average_pm25_levels} µg/m³ - JSST tavsiya qilgan darajasidan #{amount_exceeds_by} barobar ko'p.\n
+🟡 Качество воздуха сейчас умеренное. Людям с плохим состоянием здоровья следует ограничить долгое времяпровождение на улице. Концентрация PM2.5 частиц составляет #{average_pm25_levels} µg/m³ - превышает рекомендованное значение ВОЗ в #{amount_exceeds_by} раз.\n
+🟡 The air quality is moderate at the moment. Sensitive groups may consider limiting prolonged outdoor activities. PM2.5 concentration is #{average_pm25_levels} µg/m³ - exceeds WHO recommended value #{amount_exceeds_by} times.\n
    "
   end
 
-  defp produce_message(average_pm25_levels)
-       when average_pm25_levels > 35.4 and average_pm25_levels <= 55.4 do
-    "🟠 Nosog'lom. Sog'lig'i nozik kimsalar uchun xavfli. PM2.5 darajasi #{average_pm25_levels} µg/m³.\n
-    🟠 Вредное для людей с плохим здоровьем. Людям с заболеваниями следует ограничить на улице. Концентрация PM2.5 частиц составляет #{average_pm25_levels} µg/m³.\n
-    🟠 Unhealthy for Sensitive Groups. Sensitive groups must stay inside. PM2.5 concentration is #{average_pm25_levels} µg/m³.\n
+  def produce_message(average_pm25_levels)
+      when average_pm25_levels > 35.4 and average_pm25_levels <= 55.4 do
+    amount_exceeds_by = (average_pm25_levels / 5) |> Float.floor(1)
+    "⏰ #{get_formated_time_now()} \n
+🟠 Nosog'lom. Sog'lig'i nozik kimsalar uchun xavfli. PM2.5 darajasi #{average_pm25_levels} µg/m³ - JSST tavsiya qilgan darajasidan #{(average_pm25_levels / 5) |> Float.floor(1)} barobar ko'p.\n
+🟠 Вредное для людей с плохим здоровьем. Людям с заболеваниями следует ограничить на улице. Концентрация PM2.5 частиц составляет #{average_pm25_levels} µg/m³ - превышает рекомендованное значение ВОЗ в #{amount_exceeds_by} раз.\n
+🟠 Unhealthy for Sensitive Groups. Sensitive groups must stay inside. PM2.5 concentration is #{average_pm25_levels} µg/m³ - exceeds WHO recommended value #{amount_exceeds_by} times.\n
    "
   end
 
-  defp produce_message(average_pm25_levels)
-       when average_pm25_levels > 55.4 and average_pm25_levels <= 150.4 do
-    "🔴 Zararli. Tashqarida ko'p vaqt o'tkazish xavfli. PM2.5 darajasi #{average_pm25_levels} µg/m³.\n
-🔴 Вредно. Всем следует ограничить долгое времяпровождение на улице. Концентрация PM2.5 частиц составляет #{average_pm25_levels} µg/m³.\n
-🔴 Unhealthy. Everyone else should limit prolonged extertion. PM2.5 concentration is #{average_pm25_levels} µg/m³.\n
+  def produce_message(average_pm25_levels)
+      when average_pm25_levels > 55.4 and average_pm25_levels <= 150.4 do
+    amount_exceeds_by = (average_pm25_levels / 5) |> Float.floor(1)
+    "⏰ #{get_formated_time_now()} \n
+🔴 Zararli. Tashqarida ko'p vaqt o'tkazish xavfli. PM2.5 darajasi #{average_pm25_levels} µg/m³ - JSST tavsiya qilgan darajasidan #{(average_pm25_levels / 5) |> Float.floor(1)} barobar ko'p.\n
+🔴 Вредно. Всем следует ограничить долгое времяпровождение на улице. Концентрация PM2.5 частиц составляет #{average_pm25_levels} µg/m³ - превышает рекомендованное значение ВОЗ в #{amount_exceeds_by} раз.\n
+🔴 Unhealthy. Everyone else should limit prolonged extertion. PM2.5 concentration is #{average_pm25_levels} µg/m³ - exceeds WHO recommended value #{amount_exceeds_by} times.\n
 "
   end
 
-  defp produce_message(average_pm25_levels)
-       when average_pm25_levels > 150.4 do
-    "💀 O'ta zararli. Kimsalar ochiq havodagi barcha faoliyatlar cheklanishi lozim. PM2.5 darajasi #{average_pm25_levels} µg/m³.\n
-💀 Очень вредное. Избегайте времяпровождение на улице. Концентрация PM2.5 частиц составляет #{average_pm25_levels} µg/m³.\n
-💀 Hazardous. Everyone else should avoid prolonged exertion. PM2.5 concentration is #{average_pm25_levels} µg/m³.\n
+  def produce_message(average_pm25_levels)
+      when average_pm25_levels > 150.4 do
+    amount_exceeds_by = (average_pm25_levels / 5) |> Float.floor(1)
+    "⏰ #{get_formated_time_now()} \n
+💀 O'ta zararli. Kimsalar ochiq havodagi barcha faoliyatlar cheklanishi lozim. PM2.5 darajasi #{average_pm25_levels} µg/m³ - JSST tavsiya qilgan darajasidan #{(average_pm25_levels / 5) |> Float.floor(1)} barobar ko'p.\n
+💀 Очень вредное. Избегайте времяпровождение на улице. Концентрация PM2.5 частиц составляет #{average_pm25_levels} µg/m³ - превышает рекомендованное значение ВОЗ в #{amount_exceeds_by} раз.\n
+💀 Hazardous. Everyone else should avoid prolonged exertion. PM2.5 concentration is #{average_pm25_levels} µg/m³ - exceeds WHO recommended value #{amount_exceeds_by} times.\n
 "
   end
 
@@ -88,6 +97,12 @@ TDTU | ТГТУ | TSTU: #{tstu.pm25_value} µg/m³, #{tstu.last_updated |> forma
     utc_time
     |> DateTime.add(5, :hour)
     |> Calendar.strftime("%H:%M %0d.%0m.%Y")
+  end
+
+  def get_formated_time_now() do
+    DateTime.utc_now()
+    |> DateTime.add(5, :hour)
+    |> Calendar.strftime("%H:%M")
   end
 
   defp calculate_average_value(source_1, source_2) do
