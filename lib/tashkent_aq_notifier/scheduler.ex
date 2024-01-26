@@ -74,6 +74,9 @@ defmodule TashkentAqNotifier.Scheduler do
             end)
 
             nil
+
+          _ ->
+            nil
         end
       end)
       |> Enum.filter(fn item -> item == true end)

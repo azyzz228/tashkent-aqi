@@ -14,7 +14,12 @@ defmodule TashkentAqNotifier.Notifier do
     sources = describe_sources(us_embassy_result, tstu_result)
 
     final_message = message <> sources
-    spawn(fn -> Cachex.put(:cache, :latest_measurement, final_message, ttl: :timer.hours(8)) end)
+
+    spawn(fn ->
+      if String.length(final_message) > 0 do
+        Cachex.put(:cache, :latest_measurement, final_message, ttl: :timer.hours(8))
+      end
+    end)
 
     final_message
   end
@@ -35,6 +40,10 @@ defmodule TashkentAqNotifier.Notifier do
       last_updated: pm25_levels["lastUpdated"],
       pm25_value: pm25_levels["lastValue"]
     }
+  end
+
+  def produce_message(nil) do
+    ""
   end
 
   def produce_message(average_pm25_levels) when average_pm25_levels <= 12 do
@@ -85,10 +94,34 @@ defmodule TashkentAqNotifier.Notifier do
 "
   end
 
-  defp describe_sources(us_embassy, tstu) do
-    "Manbalar | Источники | Sources:
-AQSH Elchixonasi | Посольство США | US Embassy: #{us_embassy.pm25_value} µg/m³, #{us_embassy.last_updated |> format_datetime()}\n
-TDTU | ТГТУ | TSTU: #{tstu.pm25_value} µg/m³, #{tstu.last_updated |> format_datetime()}"
+  defp describe_sources(us_embassy, tstu) when us_embassy.pm25_value > 0 or tstu.pm25_value > 0 do
+    msg = "Manbalar | Источники | Sources:\n"
+
+    msg =
+      case us_embassy.pm25_value > 0 do
+        true ->
+          msg <>
+            "AQSH Elchixonasi | Посольство США | US Embassy: #{us_embassy.pm25_value} µg/m³, #{us_embassy.last_updated |> format_datetime()}\n"
+
+        false ->
+          msg
+      end
+
+    msg =
+      case tstu.pm25_value > 0 do
+        true ->
+          msg <>
+            "TDTU | ТГТУ | TSTU: #{tstu.pm25_value} µg/m³, #{tstu.last_updated |> format_datetime()}"
+
+        false ->
+          msg
+      end
+
+    msg
+  end
+
+  defp describe_sources(_, _) do
+    ""
   end
 
   defp format_datetime(datetime_iso) do
@@ -105,7 +138,22 @@ TDTU | ТГТУ | TSTU: #{tstu.pm25_value} µg/m³, #{tstu.last_updated |> forma
     |> Calendar.strftime("%H:%M")
   end
 
-  defp calculate_average_value(source_1, source_2) do
+  defp calculate_average_value(source_1, source_2)
+       when source_1.pm25_value > 0 and source_2.pm25_value > 0 do
     (source_1.pm25_value + source_2.pm25_value) / 2
+  end
+
+  defp calculate_average_value(source_1, source_2)
+       when source_1.pm25_value < 0 and source_2.pm25_value > 0 do
+    source_2.pm25_value
+  end
+
+  defp calculate_average_value(source_1, source_2)
+       when source_2.pm25_value < 0 and source_1.pm25_value > 0 do
+    source_1.pm25_value
+  end
+
+  defp calculate_average_value(_source_1, _source_2) do
+    nil
   end
 end
