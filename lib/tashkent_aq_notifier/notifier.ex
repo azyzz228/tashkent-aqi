@@ -168,7 +168,22 @@ defmodule TashkentAqNotifier.Notifier do
     nil
   end
 
-  defp calculate_aqi(pm25_levels) do
-    (pm25_levels / 0.24) |> Float.floor(0)
+  def calculate_aqi(pm25) do
+    aqi_breakpoints = [
+      %{low: 0.0, high: 12.0, ilow: 0, ihigh: 50},
+      %{low: 12.1, high: 35.4, ilow: 51, ihigh: 100},
+      %{low: 35.5, high: 55.4, ilow: 101, ihigh: 150},
+      %{low: 55.5, high: 150.4, ilow: 151, ihigh: 200},
+      %{low: 150.5, high: 250.4, ilow: 201, ihigh: 300},
+      %{low: 250.5, high: 500.4, ilow: 301, ihigh: 500}
+    ]
+
+    Enum.find_value(aqi_breakpoints, fn %{low: low, high: high, ilow: ilow, ihigh: ihigh} ->
+      if low <= pm25 and pm25 <= high do
+        (ilow + (ihigh - ilow) / (high - low) * (pm25 - low)) |> Float.floor()
+      else
+        nil
+      end
+    end)
   end
 end
