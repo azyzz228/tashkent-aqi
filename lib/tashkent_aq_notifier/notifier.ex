@@ -2,10 +2,11 @@ defmodule TashkentAqNotifier.Notifier do
   @locations %{us_embassy: 8881, tstu: 368_739}
   def get_notification_message do
     us_embassy_task = Task.async(fn -> fetch_from_api_for(@locations.us_embassy) end)
-    tstu_task = Task.async(fn -> fetch_from_api_for(@locations.tstu) end)
+    # tstu_task = Task.async(fn -> fetch_from_api_for(@locations.tstu) end)
 
     us_embassy_result = Task.await(us_embassy_task)
-    tstu_result = Task.await(tstu_task)
+    tstu_result = %{last_updated: 0, pm25_value: -999}
+    # tstu_result = Task.await(tstu_task)
 
     message =
       calculate_average_value(us_embassy_result, tstu_result)
